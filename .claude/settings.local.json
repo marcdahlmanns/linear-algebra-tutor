@@ -23,7 +23,13 @@
       "Bash(timeout 10 bash:*)",
       "Bash(pytest:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nComplete Linear Algebra Tutor - All 5 Paths + Professional UX\n\nImplemented comprehensive CLI educational tool for undergraduate linear algebra:\n\nPath 1: Interactive Sessions\n- 46 curated exercises with hints and solutions\n- Fixed-screen UI with Rich layouts\n- Progress tracking with mastery calculation\n\nPath 2: Content Library\n- 46 exercises across vectors and matrices\n- 4 exercise types \\(computational, multiple choice, true/false, fill-in\\)\n- Multiple difficulty levels\n\nPath 3: Visualizations\n- ASCII art for 2D vectors\n- Rich matrix displays with properties\n- 10 standalone visualization commands\n- Geometric interpretations\n\nPath 4: Advanced Solvers\n- 7 solver types with step-by-step explanations\n- Gaussian elimination, RREF, eigenvalues \\(2×2\\)\n- Matrix decompositions \\(LU, QR, SVD\\)\n- Linear system solver with solution analysis\n\nPath 5: Exercise Generators\n- 14 configurable generators for infinite practice\n- Quality controls \\(non-singular matrices, numerical stability\\)\n- Reproducible with seeds\n- Dynamic hint generation\n\nUX Improvements:\n- Fixed-screen layout \\(no endless scrolling\\)\n- Question always visible at top\n- Progress header with topic/exercise/difficulty\n- Status area with accumulated hints and messages\n- Graceful Ctrl+C handling with progress save\n- Terminal size validation\n- Question visible during answer input\n\nTechnical Details:\n- ~8,000+ lines of Python code\n- 40+ CLI commands using Typer\n- Rich library for terminal UI\n- SQLite for progress tracking\n- 31 passing tests \\(66% coverage\\)\n- Comprehensive documentation\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(python:*)"
     ]
   }
 }

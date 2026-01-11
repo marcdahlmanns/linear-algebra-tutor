@@ -10,6 +10,7 @@ app = typer.Typer(
     name="linalg-tutor",
     help="Interactive Linear Algebra Teaching Tool",
     add_completion=False,
+    no_args_is_help=False,  # Don't show help when no args - show menu instead
 )
 
 console = Console()
@@ -143,6 +144,16 @@ def version():
     """Show version information."""
     console.print("[bold cyan]Linear Algebra Tutor[/bold cyan] version [green]0.1.0[/green]")
     console.print("A comprehensive CLI tool for learning linear algebra")
+
+
+@app.callback(invoke_without_command=True)
+def callback(ctx: typer.Context):
+    """Callback to handle default behavior when no command is given."""
+    # If no command is given, run guided learning app
+    if ctx.invoked_subcommand is None:
+        from .guided_app import run_guided_app
+        run_guided_app()
+        raise typer.Exit()
 
 
 def main():
