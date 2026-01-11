@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(python3:*)",
+      "Bash(command -v:*)",
+      "Bash(uv venv:*)",
+      "Bash(uv pip install:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(.venv/bin/pytest tests/ -v)",
+      "Bash(.venv/bin/pytest tests/unit/test_progress/ -v)",
+      "Bash(.venv/bin/pytest tests/ -v --tb=short)",
+      "Bash(.venv/bin/pytest tests/ -q)",
+      "Bash(.venv/bin/linalg-tutor topics:*)",
+      "Bash(.venv/bin/linalg-tutor:*)",
+      "Bash(.venv/bin/pip:*)",
+      "Bash(source:*)",
+      "Bash(linalg-tutor visualize:*)",
+      "Bash(linalg-tutor:*)",
+      "Bash(python test_ux.py:*)",
+      "Bash(timeout 5 python:*)",
+      "Bash(timeout 5 python3:*)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(pytest:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
