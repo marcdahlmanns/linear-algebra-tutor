@@ -16,13 +16,13 @@ console = Console()
 def show_welcome():
     """Show welcome screen."""
     console.print(Panel.fit(
-        "[bold cyan]Welcome to Linear Algebra Tutor![/bold cyan]\n\n"
+        "[bold cyan]Welcome to Linear Algebra Tutor![/bold cyan]\n"
         "An interactive learning application for mastering\n"
         "undergraduate linear algebra through practice.",
         title="Linear Algebra Tutor",
-        border_style="cyan"
+        border_style="cyan",
+        padding=(0, 1)
     ))
-    console.print()
 
 
 def show_progress_overview(session: SessionState):
@@ -35,15 +35,15 @@ def show_progress_overview(session: SessionState):
     current_chapter = session.get_current_chapter()
 
     console.print(Panel.fit(
-        f"[bold]Learning Progress[/bold]\n\n"
+        f"[bold]Learning Progress[/bold]\n"
         f"Current Chapter: [cyan]{current_chapter['name']}[/cyan]\n"
         f"Chapters Completed: [green]{summary['completed_chapters']}/{summary['total_chapters']}[/green]\n"
         f"Exercises Completed: [yellow]{summary['total_exercises']}[/yellow]\n"
         f"Progress: [cyan]{summary['progress_percent']:.0f}%[/cyan]",
         title="Your Progress",
-        border_style="green"
+        border_style="green",
+        padding=(0, 1)
     ))
-    console.print()
 
 
 def show_chapter_list(session: SessionState):
@@ -81,7 +81,6 @@ def show_chapter_list(session: SessionState):
         )
 
     console.print(table)
-    console.print()
 
 
 def select_chapter_menu(session: SessionState) -> str:
@@ -141,11 +140,11 @@ def chapter_menu(session: SessionState, topic: str) -> str:
 
     console.clear()
     console.print(Panel.fit(
-        f"[bold cyan]Chapter {chapter['id']}: {chapter['name']}[/bold cyan]\n\n"
+        f"[bold cyan]Chapter {chapter['id']}: {chapter['name']}[/bold cyan]\n"
         f"{chapter['description']}",
-        border_style="cyan"
+        border_style="cyan",
+        padding=(0, 1)
     ))
-    console.print()
 
     choices = [
         {"name": "📚 Practice Curated Exercises", "value": "practice_curated"},
@@ -208,25 +207,25 @@ def main_menu(session: SessionState) -> str:
 def show_help():
     """Show help screen with available commands."""
     console.print(Panel(
-        "[bold]Linear Algebra Tutor - Help[/bold]\n\n"
+        "[bold]Linear Algebra Tutor - Help[/bold]\n"
         "[cyan]Guided Learning:[/cyan]\n"
-        "  Just run 'linalg-tutor' and follow the menus!\n\n"
+        "  Just run 'linalg-tutor' and follow the menus!\n"
         "[cyan]Quick Commands (Optional):[/cyan]\n"
         "  linalg-tutor exercise practice vectors    - Practice vectors\n"
         "  linalg-tutor generate practice vector_add - Infinite practice\n"
         "  linalg-tutor visualize vector 3,4         - See visualizations\n"
-        "  linalg-tutor solve eigenvalues '1,2;3,4'  - Step-by-step solver\n\n"
+        "  linalg-tutor solve eigenvalues '1,2;3,4'  - Step-by-step solver\n"
         "[cyan]Navigation:[/cyan]\n"
         "  • Use arrow keys to navigate menus\n"
         "  • Press Enter to select\n"
-        "  • Press Ctrl+C to go back or exit\n\n"
+        "  • Press Ctrl+C to go back or exit\n"
         "[cyan]Progress:[/cyan]\n"
         "  Your progress is automatically saved!\n"
         "  Complete chapters to unlock new content.",
         title="Help",
-        border_style="yellow"
+        border_style="yellow",
+        padding=(0, 1)
     ))
-    console.print()
     questionary.press_any_key_to_continue("Press any key to continue...").ask()
 
 
@@ -260,19 +259,19 @@ def settings_menu(session: SessionState) -> str:
 
         if confirm:
             session.reset()
-            console.print("[yellow]✓ All progress has been reset.[/yellow]\n")
+            console.print("[yellow]✓ All progress has been reset.[/yellow]")
             questionary.press_any_key_to_continue("Press any key to continue...").ask()
 
     elif answer == "data_location":
         console.print(Panel(
-            f"[bold]Data Storage Location:[/bold]\n\n"
+            f"[bold]Data Storage Location:[/bold]\n"
             f"Session State: {session.state_file}\n"
-            f"Progress Database: {session.data_dir / 'progress.db'}\n\n"
+            f"Progress Database: {session.data_dir / 'progress.db'}\n"
             f"[dim]You can backup or delete these files if needed.[/dim]",
             title="Data Location",
-            border_style="cyan"
+            border_style="cyan",
+            padding=(0, 1)
         ))
-        console.print()
         questionary.press_any_key_to_continue("Press any key to continue...").ask()
 
     return answer if answer else "back"

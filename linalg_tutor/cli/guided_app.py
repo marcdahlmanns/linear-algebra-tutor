@@ -42,7 +42,7 @@ class GuidedLearningApp:
 
                 if choice == "exit":
                     self.running = False
-                    console.print("\n[cyan]Thanks for learning with Linear Algebra Tutor![/cyan]\n")
+                    console.print("[cyan]Thanks for learning with Linear Algebra Tutor![/cyan]")
 
                 elif choice == "continue":
                     self._continue_learning()
@@ -64,7 +64,7 @@ class GuidedLearningApp:
 
             except KeyboardInterrupt:
                 # Handle Ctrl+C gracefully
-                console.print("\n[yellow]Returning to main menu...[/yellow]\n")
+                console.print("[yellow]Returning to main menu...[/yellow]")
                 continue
 
     def _continue_learning(self):
@@ -122,8 +122,8 @@ class GuidedLearningApp:
         exercises = get_exercises_by_topic(topic)
 
         if not exercises:
-            console.print(f"[yellow]No curated exercises available for {topic} yet.[/yellow]\n")
-            console.print("[dim]Try generated practice instead![/dim]\n")
+            console.print(f"[yellow]No curated exercises available for {topic} yet.[/yellow]")
+            console.print("[dim]Try generated practice instead![/dim]")
             import questionary
             questionary.press_any_key_to_continue("Press any key to continue...").ask()
             return
@@ -145,7 +145,7 @@ class GuidedLearningApp:
         import random
         selected = random.sample(exercises, min(count, len(exercises)))
 
-        console.print(f"\n[cyan]Starting practice session: {count} exercises[/cyan]\n")
+        console.print(f"[cyan]Starting practice session: {count} exercises[/cyan]")
 
         # Practice session
         results = []
@@ -160,7 +160,7 @@ class GuidedLearningApp:
                 result = prompt.run()
                 results.append(result)
             except KeyboardInterrupt:
-                console.print("\n[yellow]Practice interrupted.[/yellow]\n")
+                console.print("[yellow]Practice interrupted.[/yellow]")
                 break
 
         # Update session state
@@ -190,7 +190,7 @@ class GuidedLearningApp:
         generators = generator_map.get(topic, [])
 
         if not generators:
-            console.print(f"[yellow]No generators available for {topic} yet.[/yellow]\n")
+            console.print(f"[yellow]No generators available for {topic} yet.[/yellow]")
             import questionary
             questionary.press_any_key_to_continue("Press any key to continue...").ask()
             return
@@ -226,7 +226,7 @@ class GuidedLearningApp:
         config = GeneratorConfig()
         generator = get_generator(gen_name, config)
 
-        console.print(f"\n[cyan]Starting practice: {count} exercises[/cyan]\n")
+        console.print(f"[cyan]Starting practice: {count} exercises[/cyan]")
 
         results = []
         for i in range(count):
@@ -241,7 +241,7 @@ class GuidedLearningApp:
                 result = prompt.run()
                 results.append(result)
             except KeyboardInterrupt:
-                console.print("\n[yellow]Practice interrupted.[/yellow]\n")
+                console.print("[yellow]Practice interrupted.[/yellow]")
                 break
 
         # Update session state
@@ -259,11 +259,11 @@ class GuidedLearningApp:
         Args:
             topic: Topic to visualize
         """
-        console.print(f"\n[cyan]Visualizations for {topic}[/cyan]\n")
+        console.print(f"[cyan]Visualizations for {topic}[/cyan]")
         console.print("[yellow]Use visualization commands:[/yellow]")
         console.print("  linalg-tutor visualize vector 3,4")
         console.print("  linalg-tutor visualize matrix '1,2;3,4'")
-        console.print("  linalg-tutor visualize demo\n")
+        console.print("  linalg-tutor visualize demo")
 
         import questionary
         questionary.press_any_key_to_continue("Press any key to continue...").ask()
@@ -274,11 +274,11 @@ class GuidedLearningApp:
         Args:
             topic: Topic for solvers
         """
-        console.print(f"\n[cyan]Advanced Solvers for {topic}[/cyan]\n")
+        console.print(f"[cyan]Advanced Solvers for {topic}[/cyan]")
         console.print("[yellow]Use solver commands:[/yellow]")
         console.print("  linalg-tutor solve gaussian '2,1;3,4' -b '5,6'")
         console.print("  linalg-tutor solve eigenvalues '4,-2;1,1'")
-        console.print("  linalg-tutor solve demo\n")
+        console.print("  linalg-tutor solve demo")
 
         import questionary
         questionary.press_any_key_to_continue("Press any key to continue...").ask()
@@ -300,7 +300,6 @@ class GuidedLearningApp:
         stats_table.add_row("Overall Progress", f"{summary['progress_percent']:.0f}%")
 
         console.print(stats_table)
-        console.print()
 
         import questionary
         questionary.press_any_key_to_continue("Press any key to continue...").ask()
@@ -343,7 +342,7 @@ class GuidedLearningApp:
                 result = prompt.run()
                 results.append(result)
             except KeyboardInterrupt:
-                console.print("\n[yellow]Practice interrupted.[/yellow]\n")
+                console.print("[yellow]Practice interrupted.[/yellow]")
                 break
 
         # Show summary
@@ -367,12 +366,11 @@ class GuidedLearningApp:
         from rich.table import Table
         from rich.panel import Panel
 
-        console.print("\n")
         console.print(Panel.fit(
             f"[bold cyan]Session Complete: {topic.title()}[/bold cyan]",
-            border_style="cyan"
+            border_style="cyan",
+            padding=(0, 1)
         ))
-        console.print()
 
         # Calculate stats
         total = len(results)
@@ -391,7 +389,6 @@ class GuidedLearningApp:
         table.add_row("Total Time", f"{total_time:.1f}s")
 
         console.print(table)
-        console.print()
 
         import questionary
         questionary.press_any_key_to_continue("Press any key to continue...").ask()
