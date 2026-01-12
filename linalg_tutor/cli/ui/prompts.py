@@ -122,13 +122,13 @@ class ExercisePrompt:
         # Show current message if any
         if self.message:
             display_parts.append(
-                Text(f"[{self.message_style}]{self.message}[/{self.message_style}]")
+                Text(self.message, style=self.message_style)
             )
 
         # Show stats - compact inline format
         if self.attempts > 0 or self.hints_shown > 0:
-            stats_text = f"[dim]Attempts: {self.attempts} │ Hints: {self.hints_shown}/{len(self.exercise.hints)}[/dim]"
-            display_parts.append(Text(stats_text))
+            stats_text = f"Attempts: {self.attempts} │ Hints: {self.hints_shown}/{len(self.exercise.hints)}"
+            display_parts.append(Text(stats_text, style="dim"))
 
         return Group(*display_parts)
 
@@ -268,11 +268,11 @@ class ExercisePrompt:
 
         # Show feedback
         if result.correct:
-            self.message = f"✓ Correct! {result.feedback if result.feedback != 'Correct!' else ''}"
+            self.message = "✓ Correct!"
             self.message_style = "bold green"
             return result
         else:
-            self.message = f"✗ Incorrect: {result.feedback}"
+            self.message = f"✗ {result.feedback}"
             self.message_style = "bold red"
 
             # Redisplay with error message
