@@ -68,17 +68,28 @@ class ExercisePrompt:
         self.attempts = 0
 
     def _build_display(self) -> Layout:
-        """Build the fixed display layout."""
+        """Build the compact display layout."""
+        # Get terminal size for dynamic sizing
+        try:
+            terminal_size = os.get_terminal_size()
+            term_height = terminal_size.lines
+        except OSError:
+            term_height = 24  # Default fallback
+
+        # Calculate dynamic sizes - question takes minimum needed
+        question_lines = len(self.exercise.question) // 70 + 2  # Estimate wrapped lines
+        question_size = min(max(question_lines, 2), 6)  # Between 2-6 lines
+
         layout = Layout()
 
-        # Divide screen into sections
+        # Divide screen into sections with minimal sizes
         layout.split_column(
-            Layout(name="header", size=3),
-            Layout(name="question", size=8),
-            Layout(name="status"),
+            Layout(name="header", size=1),  # Just one line for header
+            Layout(name="question", size=question_size),  # Dynamic question size
+            Layout(name="status"),  # Rest for status
         )
 
-        # Header: Progress indicator
+        # Header: Progress indicator - compact single line
         difficulty_color = {
             "practice": "green",
             "application": "yellow",
@@ -86,53 +97,52 @@ class ExercisePrompt:
         }
         color = difficulty_color.get(self.exercise.difficulty.value, "cyan")
 
-        header_table = Table.grid(expand=True)
-        header_table.add_column(justify="left")
-        header_table.add_column(justify="center")
-        header_table.add_column(justify="right")
-        header_table.add_row(
-            f"[{color}]● {self.exercise.topic.title()}[/{color}]",
-            f"[bold]Exercise {self.current_exercise}/{self.total_exercises}[/bold]",
-            f"[dim]{self.exercise.difficulty.value.title()}[/dim]"
+        # Single line header without panel borders
+        header_text = (
+            f"[{color}]{self.exercise.topic.title()}[/{color}] │ "
+            f"[bold]{self.current_exercise}/{self.total_exercises}[/bold] │ "
+            f"[{color}]{self.exercise.difficulty.value.title()}[/{color}]"
         )
-        layout["header"].update(Panel(header_table, style=color, box=SIMPLE))
+        layout["header"].update(Text(header_text, justify="center"))
 
-        # Question panel
+        # Question - compact panel
         question_text = Text(self.exercise.question, style="bold white")
         layout["question"].update(
             Panel(
-                Align.center(question_text, vertical="middle"),
-                title=f"[{color}]{self.exercise.difficulty.value.title()}[/{color}]",
+                question_text,
+                title=f"[{color}]Question[/{color}]",
                 border_style=color,
+                padding=(0, 1),  # Minimal padding
             )
         )
 
-        # Status area: hints, messages, stats
+        # Status area: hints, messages, stats - all compact
         status_content = []
 
-        # Show hints if any
+        # Show hints if any - compact format
         if self.shown_hints:
-            hints_text = "\n\n".join([
-                f"[yellow]💡 Hint {i+1}:[/yellow] {hint}"
+            hints_text = "\n".join([  # Single line break instead of double
+                f"[yellow]💡 {i+1}:[/yellow] {hint}"
                 for i, hint in enumerate(self.shown_hints)
             ])
-            status_content.append(Panel(hints_text, title="Hints", border_style="yellow", expand=False))
-
-        # Show current message if any
-        if self.message:
             status_content.append(Panel(
-                f"[{self.message_style}]{self.message}[/{self.message_style}]",
+                hints_text,
+                title="Hints",
+                border_style="yellow",
                 expand=False,
-                border_style=self.message_style
+                padding=(0, 1)
             ))
 
-        # Show stats
-        stats_table = Table.grid(expand=True)
-        stats_table.add_column()
-        stats_table.add_column(justify="right")
-        stats_table.add_row("[dim]Attempts:[/dim]", f"[dim]{self.attempts}[/dim]")
-        stats_table.add_row("[dim]Hints used:[/dim]", f"[dim]{self.hints_shown}/{len(self.exercise.hints)}[/dim]")
-        status_content.append(stats_table)
+        # Show current message if any - no panel borders for messages
+        if self.message:
+            status_content.append(
+                Text(f"[{self.message_style}]{self.message}[/{self.message_style}]")
+            )
+
+        # Show stats - compact inline format
+        if self.attempts > 0 or self.hints_shown > 0:
+            stats_text = f"[dim]Attempts: {self.attempts} │ Hints: {self.hints_shown}/{len(self.exercise.hints)}[/dim]"
+            status_content.append(Text(stats_text))
 
         layout["status"].update(Group(*status_content) if status_content else "")
 
@@ -146,8 +156,7 @@ class ExercisePrompt:
         """Display the current state."""
         self._clear_screen()
         layout = self._build_display()
-        self.console.print(layout)
-        self.console.print()  # Spacing before menu
+        self.console.print(layout)  # No extra spacing
 
     def run(self) -> ExerciseResult:
         """Run interactive exercise session with fixed screen updates.
@@ -158,12 +167,12 @@ class ExercisePrompt:
         # Check terminal size (only if we're in a TTY)
         try:
             terminal_size = os.get_terminal_size()
-            if terminal_size.columns < 80 or terminal_size.lines < 24:
+            if terminal_size.columns < 80 or terminal_size.lines < 15:
                 self.console.print(
                     Panel(
                         f"[bold red]Terminal too small![/bold red]\n\n"
                         f"Current size: {terminal_size.columns}×{terminal_size.lines}\n"
-                        f"Required: 80×24 minimum\n\n"
+                        f"Required: 80×15 minimum\n\n"
                         f"Please resize your terminal and try again.",
                         title="Error",
                         border_style="red",
@@ -316,17 +325,10 @@ class ExercisePrompt:
 
     def _get_numerical_input(self) -> Optional[Any]:
         """Get numerical input (vector, matrix, or scalar)."""
-        # Show question as context
-        self.console.print(f"\n[bold cyan]Question:[/bold cyan] {self.exercise.question}\n")
-
         self.console.print(
-            "[cyan]Enter your answer:[/cyan]\n"
-            "  • For vectors: [1, 2, 3]\n"
-            "  • For matrices: [[1, 2], [3, 4]]\n"
-            "  • For scalars: 42 or 3.14\n"
+            "[dim]Format: [1,2,3] for vectors │ [[1,2],[3,4]] for matrices │ 42 for scalars[/dim]"
         )
-
-        answer_str = questionary.text("Answer:").ask()
+        answer_str = questionary.text("Your answer:").ask()
 
         if not answer_str:
             return None
@@ -344,9 +346,8 @@ class ExercisePrompt:
         exercise = self.exercise  # Type hint helper
         assert isinstance(exercise, MultipleChoiceExercise)
 
-        self.console.print()
         choice = questionary.select(
-            "Select your answer:",
+            "Your answer:",
             choices=[f"{i}. {choice}" for i, choice in enumerate(exercise.choices)],
         ).ask()
 
@@ -358,9 +359,8 @@ class ExercisePrompt:
 
     def _get_true_false_input(self) -> Optional[bool]:
         """Get true/false selection."""
-        self.console.print()
         choice = questionary.select(
-            "Select your answer:", choices=["True", "False"]
+            "Your answer:", choices=["True", "False"]
         ).ask()
 
         if not choice:
@@ -370,10 +370,7 @@ class ExercisePrompt:
 
     def _get_text_input(self) -> Optional[str]:
         """Get text input."""
-        # Show question as context
-        self.console.print(f"\n[bold cyan]Question:[/bold cyan] {self.exercise.question}\n")
-        self.console.print("[cyan]Enter your answer:[/cyan]")
-        return questionary.text("Answer:").ask()
+        return questionary.text("Your answer:").ask()
 
     def _show_hint(self):
         """Show the next available hint."""
