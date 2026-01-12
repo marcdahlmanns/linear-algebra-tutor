@@ -4,45 +4,56 @@ A comprehensive command-line tool for learning undergraduate linear algebra thro
 
 ## 🎯 What Makes This Special
 
+- **Menu-Driven Interface** - Just type `linalg-tutor` and navigate with arrow keys
+- **Compact Professional UX** - Question always visible, no wasted space, no scrolling needed
 - **46 Curated Exercises** across vectors and matrices with detailed explanations
 - **14 Exercise Generators** for infinite randomized practice
 - **Interactive Sessions** with hints, visualizations, and immediate feedback
 - **Advanced Solvers** showing step-by-step solutions for complex operations
 - **Beautiful Visualizations** including ASCII art and geometric interpretations
-- **Progress Tracking** with mastery calculation and recommendations
+- **Progress Tracking** with mastery calculation and automatic session state
 
 ## ✨ Features
 
-### 1. Interactive Practice Sessions
+### 1. Guided Learning Interface
+- **Menu-Driven Navigation**: No commands to memorize, just arrow keys
+- **10-Chapter Learning Path**: Vectors → Matrices → Linear Systems → ... → Applications
+- **Automatic Progress Saving**: Resume exactly where you left off
+- **Chapter Status Indicators**: ✓ Complete, ⚡ In Progress, → Current, ○ Not Started
+- **Session State Management**: Tracks exercises completed and time spent
+
+### 2. Interactive Practice Sessions
 - **4 Exercise Types**: Computational, Multiple Choice, True/False, Fill-in
 - **Progressive Hints**: Up to 3 hints per exercise
 - **Immediate Feedback**: Know instantly if you're correct
 - **Visualizations**: See ASCII art and geometric interpretations during practice
 - **Solutions**: Full step-by-step explanations when needed
+- **Compact Fixed-Screen UI**: Question always visible, minimal scrolling (80×15 terminal minimum)
 
-### 2. Infinite Practice with Generators
+### 3. Infinite Practice with Generators
 - **14 Generators**: Vector ops, matrix ops, linear systems
 - **Configurable**: Control dimensions, difficulty, value ranges
 - **Reproducible**: Use seeds for consistent problem sets
 - **Quality Controlled**: Avoids singular matrices, degenerate cases
 
-### 3. Visual Learning
+### 4. Visual Learning
 - **ASCII Vector Art**: 2D vectors plotted with coordinates
 - **Rich Matrix Tables**: Beautiful formatted displays
 - **Geometric Interpretations**: Angles, projections, orthogonality
 - **10 Visualization Commands**: Standalone tools for exploration
 
-### 4. Advanced Computational Solvers
+### 5. Advanced Computational Solvers
 - **Gaussian Elimination**: Row operations to REF
 - **RREF**: Complete row reduction
 - **Eigenvalues**: With characteristic polynomial (2×2)
 - **Matrix Decompositions**: LU, QR, SVD
 - **Linear Systems**: Complete solution analysis
 
-### 5. Progress Tracking
+### 6. Progress Tracking
 - **SQLite Database**: Persistent progress storage
 - **Mastery Calculation**: Accuracy × recency with decay
 - **Session Statistics**: Time, accuracy, improvement metrics
+- **Automatic State Management**: Session progress saved to JSON
 
 ## 🚀 Quick Start
 
@@ -68,10 +79,19 @@ pip install -e .
 
 ### First Steps
 
-```bash
-# See welcome message and available commands
-linalg-tutor start
+**Easiest Way: Guided Learning Menu** (Recommended)
 
+```bash
+# Just run - no commands to memorize!
+linalg-tutor
+
+# Navigate with arrow keys through intuitive menus:
+# → Continue Learning / Select Chapter / View Progress / Quick Practice
+```
+
+**Advanced: Direct Commands** (Optional for power users)
+
+```bash
 # Practice with curated exercises
 linalg-tutor exercise practice vectors
 
@@ -80,7 +100,6 @@ linalg-tutor generate practice vector_add --count 10
 
 # Visualize concepts
 linalg-tutor visualize vector 3,4
-linalg-tutor visualize matrix '1,2;3,4'
 
 # Solve with step-by-step explanations
 linalg-tutor solve eigenvalues '4,-2;1,1'

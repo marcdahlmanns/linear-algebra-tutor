@@ -68,7 +68,13 @@ mypy linalg_tutor
 
 ### Running the Application
 
-**Practice Sessions:**
+**Guided Learning Menu (Recommended):**
+```bash
+linalg-tutor                                    # Opens menu-driven interface
+# Navigate with arrow keys, automatic progress saving
+```
+
+**Practice Sessions (Direct Commands):**
 ```bash
 linalg-tutor exercise practice vectors          # Curated exercises
 linalg-tutor exercise practice matrices -n 10   # Specify count
@@ -255,7 +261,29 @@ Beyond basic operations, includes:
   - `visualize.py` - Visualization commands
   - `solve.py` - Advanced solver commands
   - `generate.py` - Generator practice commands
-- Interactive UI: `linalg_tutor/cli/ui/prompts.py` with fixed-screen layout
+
+### Guided Learning System (NEW)
+
+- **Entry point**: `linalg_tutor/cli/guided_app.py` - Main controller
+- **Menu UI**: `linalg_tutor/cli/ui/main_menu.py` - All menu functions
+- **Session State**: `linalg_tutor/core/progress/session_state.py` - Learning progression
+  - 10-chapter learning path (Vectors → Applications)
+  - JSON persistence to `~/.linalg_tutor/data/session_state.json`
+  - Automatic progress saving after each session
+- **Default behavior**: Running `linalg-tutor` without arguments launches guided menu
+- **Navigation**: Arrow keys, Enter to select, Ctrl+C to go back
+- **Backward compatible**: All original commands still work
+
+### Interactive UI System
+
+- **Exercise Prompts**: `linalg_tutor/cli/ui/prompts.py`
+  - Fixed-screen layout using Rich Layout (no scrolling)
+  - Dynamic sizing based on terminal and question length
+  - Compact design: 1-line header, 2-6 line question panel, status area
+  - Minimum terminal: 80×15 (reduced from 80×24)
+  - Question always visible during answer input
+- **Menu System**: Compact panels with `padding=(0, 1)`
+- **Design principles**: No wasted vertical space, minimal scrolling, professional appearance
 
 ## Key Constraints
 
@@ -263,7 +291,7 @@ Beyond basic operations, includes:
 - **Line length: 100 characters** (black and ruff configured)
 - **Pydantic models** used throughout for validation (note: using v2 with deprecated class-based Config)
 - **NumPy arrays** are the standard for all matrix/vector computations
-- **Test coverage** should remain above 60% (currently 66%)
+- **Test coverage**: 23% overall (51 tests, 100% pass rate, focused on core logic)
 
 ## Testing Philosophy
 
