@@ -33,6 +33,15 @@ from ...visualization import (
     explain_dot_product_geometry,
     visualize_matrix_multiply_step,
     visualize_determinant_2x2,
+    visualize_determinant_3x3,
+    visualize_determinant_geometric,
+    visualize_vector_subtraction,
+    visualize_vector_norm,
+    visualize_cross_product,
+    visualize_projection,
+    visualize_augmented_matrix,
+    visualize_linear_system_2d,
+    visualize_solution_verification,
 )
 
 
@@ -87,12 +96,12 @@ class ExercisePrompt:
         color = difficulty_color.get(self.exercise.difficulty.value, "cyan")
 
         # Single line header without panel borders
-        header_text = Text(
-            f"[{color}]{self.exercise.topic.title()}[/{color}] │ "
-            f"[bold]{self.current_exercise}/{self.total_exercises}[/bold] │ "
-            f"[{color}]{self.exercise.difficulty.value.title()}[/{color}]",
-            justify="center"
-        )
+        header_text = Text(justify="center")
+        header_text.append(self.exercise.topic.title(), style=color)
+        header_text.append(" │ ")
+        header_text.append(f"{self.current_exercise}/{self.total_exercises}", style="bold")
+        header_text.append(" │ ")
+        header_text.append(self.exercise.difficulty.value.title(), style=color)
         display_parts.append(header_text)
 
         # Question - compact panel
@@ -389,7 +398,30 @@ class ExercisePrompt:
         self.console.print()
 
         try:
-            if operation == "vector_add" and "v" in inputs and "w" in inputs:
+            # LINEAR SYSTEM - CRITICAL visualization
+            if operation == "linear_system" and "A" in inputs and "b" in inputs:
+                A = inputs["A"]
+                b = inputs["b"]
+
+                # Show augmented matrix [A|b]
+                aug_table = visualize_augmented_matrix(A, b, title="Augmented Matrix [A|b]")
+                self.console.print(aug_table)
+                self.console.print()
+
+                # Show geometric interpretation for 2D systems
+                if A.shape == (2, 2):
+                    geo_viz = visualize_linear_system_2d(A, b)
+                    self.console.print(Panel(geo_viz, title="Geometric Interpretation", border_style="green"))
+                    self.console.print()
+
+                # Show solution verification if we have expected output
+                if exercise.expected_output is not None:
+                    x = exercise.expected_output
+                    verify_viz = visualize_solution_verification(A, b, x)
+                    self.console.print(Panel(verify_viz, title="Solution Verification", border_style="yellow"))
+
+            # VECTOR OPERATIONS
+            elif operation == "vector_add" and "v" in inputs and "w" in inputs:
                 v = inputs["v"]
                 w = inputs["w"]
                 if len(v) == 2 and len(w) == 2:
@@ -401,15 +433,25 @@ class ExercisePrompt:
             elif operation == "vector_subtract" and "v" in inputs and "w" in inputs:
                 v = inputs["v"]
                 w = inputs["w"]
-                self.console.print(f"v = {v}\nw = {w}\nv - w = {v - w}")
+                viz = visualize_vector_subtraction(v, w)
+                self.console.print(Panel(viz, title="Vector Subtraction", border_style="cyan"))
 
-            elif operation == "scalar_mult" and "scalar" in inputs and "v" in inputs:
-                scalar = inputs["scalar"]
-                v = inputs["v"]
-                print_vector_visualization(v, label="v", show_2d=(len(v) == 2))
-                self.console.print(f"\nScalar: {scalar}\nResult: {scalar} × v = {scalar * v}")
+            elif operation == "vector_scalar_multiply":
+                # Handle both vector and matrix scalar multiplication
+                if "scalar" in inputs and "v" in inputs:
+                    scalar = inputs["scalar"]
+                    v = inputs["v"]
+                    print_vector_visualization(v, label="v", show_2d=(len(v) == 2))
+                    self.console.print(f"\nScalar: {scalar}\nResult: {scalar} × v = {scalar * v}")
+                elif "scalar" in inputs and "A" in inputs:
+                    scalar = inputs["scalar"]
+                    A = inputs["A"]
+                    print_matrix_visualization(A, title="Matrix A")
+                    self.console.print(f"\nScalar: {scalar}")
+                    self.console.print("\nResult:")
+                    print_matrix_visualization(scalar * A, title=f"{scalar} × A")
 
-            elif operation == "dot_product" and "v" in inputs and "w" in inputs:
+            elif operation == "vector_dot" and "v" in inputs and "w" in inputs:
                 v = inputs["v"]
                 w = inputs["w"]
                 viz = visualize_dot_product(v, w)
@@ -417,7 +459,23 @@ class ExercisePrompt:
                 self.console.print()
                 geo_viz = explain_dot_product_geometry(v, w)
                 self.console.print(Panel(geo_viz, title="Geometric Meaning", border_style="green"))
+                self.console.print()
+                # Add projection visualization
+                proj_viz = visualize_projection(v, w)
+                self.console.print(Panel(proj_viz, title="Projection of v onto w", border_style="magenta"))
 
+            elif operation == "vector_norm" and "v" in inputs:
+                v = inputs["v"]
+                viz = visualize_vector_norm(v)
+                self.console.print(Panel(viz, title="Vector Norm", border_style="cyan"))
+
+            elif operation == "cross_product" and "v" in inputs and "w" in inputs:
+                v = inputs["v"]
+                w = inputs["w"]
+                viz = visualize_cross_product(v, w)
+                self.console.print(Panel(viz, title="Cross Product", border_style="cyan"))
+
+            # MATRIX OPERATIONS
             elif operation == "matrix_add" and "A" in inputs and "B" in inputs:
                 A = inputs["A"]
                 B = inputs["B"]
@@ -447,7 +505,18 @@ class ExercisePrompt:
                 A = inputs["A"]
                 if A.shape == (2, 2):
                     viz = visualize_determinant_2x2(A)
-                    self.console.print(Panel(viz, title="Determinant Calculation", border_style="cyan"))
+                    self.console.print(Panel(viz, title="Determinant Calculation (2×2)", border_style="cyan"))
+                    self.console.print()
+                    # Add geometric interpretation
+                    geo_viz = visualize_determinant_geometric(A)
+                    self.console.print(Panel(geo_viz, title="Geometric Meaning", border_style="green"))
+                elif A.shape == (3, 3):
+                    viz = visualize_determinant_3x3(A)
+                    self.console.print(Panel(viz, title="Determinant Calculation (3×3)", border_style="cyan"))
+                    self.console.print()
+                    # Add geometric interpretation
+                    geo_viz = visualize_determinant_geometric(A)
+                    self.console.print(Panel(geo_viz, title="Geometric Meaning", border_style="green"))
                 else:
                     print_matrix_visualization(A, title="Matrix A")
                     det = np.linalg.det(A)

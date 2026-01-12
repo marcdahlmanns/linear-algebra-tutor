@@ -373,3 +373,211 @@ def print_matrix_visualization(matrix: np.ndarray, title: str = "Matrix", show_p
         console.print("")
         properties = visualize_matrix_properties(matrix, title)
         console.print(Panel(properties, title="Properties", border_style="yellow"))
+
+
+def visualize_determinant_3x3(A: np.ndarray) -> str:
+    """Visualize 3×3 determinant calculation using cofactor expansion.
+
+    Args:
+        A: 3×3 matrix
+
+    Returns:
+        String showing the calculation steps
+    """
+    if A.shape != (3, 3):
+        return f"This visualization requires a 3×3 matrix, got {A.shape}"
+
+    output = []
+    output.append("Determinant via Cofactor Expansion (first row):")
+    output.append("")
+
+    # Show matrix
+    output.append("     ┌                 ┐")
+    output.append(f"     │ {A[0,0]:6.3g}  {A[0,1]:6.3g}  {A[0,2]:6.3g} │")
+    output.append(f"det  │ {A[1,0]:6.3g}  {A[1,1]:6.3g}  {A[1,2]:6.3g} │")
+    output.append(f"     │ {A[2,0]:6.3g}  {A[2,1]:6.3g}  {A[2,2]:6.3g} │")
+    output.append("     └                 ┘")
+    output.append("")
+
+    # Calculate minors
+    M11 = A[1,1]*A[2,2] - A[1,2]*A[2,1]
+    M12 = A[1,0]*A[2,2] - A[1,2]*A[2,0]
+    M13 = A[1,0]*A[2,1] - A[1,1]*A[2,0]
+
+    output.append(f"= {A[0,0]:g} × │{A[1,1]:g}  {A[1,2]:g}│ - {A[0,1]:g} × │{A[1,0]:g}  {A[1,2]:g}│ + {A[0,2]:g} × │{A[1,0]:g}  {A[1,1]:g}│")
+    output.append(f"        │{A[2,1]:g}  {A[2,2]:g}│         │{A[2,0]:g}  {A[2,2]:g}│         │{A[2,0]:g}  {A[2,1]:g}│")
+    output.append("")
+    output.append(f"= {A[0,0]:g} × ({M11:g}) - {A[0,1]:g} × ({M12:g}) + {A[0,2]:g} × ({M13:g})")
+    output.append("")
+
+    det = A[0,0]*M11 - A[0,1]*M12 + A[0,2]*M13
+    output.append(f"= {A[0,0]*M11:g} - {A[0,1]*M12:g} + {A[0,2]*M13:g}")
+    output.append("")
+    output.append(f"= {det:g}")
+
+    return "\n".join(output)
+
+
+def visualize_determinant_geometric(A: np.ndarray) -> str:
+    """Explain geometric meaning of determinant.
+
+    Args:
+        A: 2×2 or 3×3 matrix
+
+    Returns:
+        String explaining geometric interpretation
+    """
+    det = np.linalg.det(A)
+
+    output = []
+    output.append("Geometric Meaning of Determinant:")
+    output.append("")
+
+    if A.shape == (2, 2):
+        output.append("For a 2×2 matrix:")
+        output.append(f"  det(A) = {det:.4g}")
+        output.append("")
+        output.append(f"  |det(A)| = {abs(det):.4g} = Area of parallelogram")
+        output.append("  formed by the column vectors")
+        output.append("")
+        if det > 0:
+            output.append("  det > 0 → Preserves orientation")
+        elif det < 0:
+            output.append("  det < 0 → Reverses orientation (reflection)")
+        else:
+            output.append("  det = 0 → Collapses to line (singular)")
+
+    elif A.shape == (3, 3):
+        output.append("For a 3×3 matrix:")
+        output.append(f"  det(A) = {det:.4g}")
+        output.append("")
+        output.append(f"  |det(A)| = {abs(det):.4g} = Volume of parallelepiped")
+        output.append("  formed by the column vectors")
+        output.append("")
+        if abs(det) < 1e-10:
+            output.append("  det = 0 → Collapses to plane (singular)")
+        elif det > 0:
+            output.append("  det > 0 → Right-handed system")
+        else:
+            output.append("  det < 0 → Left-handed system")
+
+    else:
+        output.append(f"For an {A.shape[0]}×{A.shape[1]} matrix:")
+        output.append(f"  det(A) = {det:.4g}")
+        output.append("")
+        output.append("  |det(A)| = n-dimensional volume scaling factor")
+
+    output.append("")
+    output.append("Key Properties:")
+    output.append("  • det = 0 ⟺ matrix is singular (non-invertible)")
+    output.append("  • det ≠ 0 ⟺ matrix is invertible")
+    output.append("  • det(AB) = det(A) × det(B)")
+    output.append("  • det(A^T) = det(A)")
+
+    return "\n".join(output)
+
+
+def visualize_eigenvalues_2x2(A: np.ndarray) -> str:
+    """Visualize eigenvalue calculation for 2×2 matrix.
+
+    Args:
+        A: 2×2 matrix
+
+    Returns:
+        String showing the calculation
+    """
+    if A.shape != (2, 2):
+        return f"This visualization requires a 2×2 matrix, got {A.shape}"
+
+    output = []
+    output.append("Finding Eigenvalues for 2×2 Matrix:")
+    output.append("")
+
+    # Show matrix
+    a, b = A[0, :]
+    c, d = A[1, :]
+    output.append(f"A = [{a:g}  {b:g}]")
+    output.append(f"    [{c:g}  {d:g}]")
+    output.append("")
+
+    # Characteristic equation: det(A - λI) = 0
+    output.append("Characteristic equation: det(A - λI) = 0")
+    output.append("")
+    output.append(f"det([{a:g}-λ    {b:g}  ]) = 0")
+    output.append(f"    [{c:g}      {d:g}-λ])")
+    output.append("")
+
+    # Expand
+    trace = a + d
+    det = a * d - b * c
+
+    output.append(f"({a:g}-λ)({d:g}-λ) - ({b:g})({c:g}) = 0")
+    output.append("")
+    output.append(f"λ² - {trace:g}λ + {det:g} = 0")
+    output.append("")
+
+    # Solve using quadratic formula
+    discriminant = trace**2 - 4*det
+    output.append(f"Using quadratic formula:")
+    output.append(f"  λ = ({trace:g} ± √({discriminant:g})) / 2")
+    output.append("")
+
+    if discriminant >= 0:
+        lambda1 = (trace + np.sqrt(discriminant)) / 2
+        lambda2 = (trace - np.sqrt(discriminant)) / 2
+        output.append(f"  λ₁ = {lambda1:.4g}")
+        output.append(f"  λ₂ = {lambda2:.4g}")
+
+        if abs(discriminant) < 1e-10:
+            output.append("")
+            output.append("  (Repeated eigenvalue)")
+    else:
+        real_part = trace / 2
+        imag_part = np.sqrt(-discriminant) / 2
+        output.append(f"  λ₁ = {real_part:.4g} + {imag_part:.4g}i")
+        output.append(f"  λ₂ = {real_part:.4g} - {imag_part:.4g}i")
+        output.append("")
+        output.append("  (Complex eigenvalues)")
+
+    return "\n".join(output)
+
+
+def explain_eigenvectors(A: np.ndarray, eigenvalue: float) -> str:
+    """Explain eigenvectors for a given eigenvalue.
+
+    Args:
+        A: Matrix
+        eigenvalue: An eigenvalue of A
+
+    Returns:
+        String explaining how to find eigenvectors
+    """
+    output = []
+    output.append(f"Finding Eigenvector for λ = {eigenvalue:.4g}:")
+    output.append("")
+    output.append("An eigenvector v satisfies: Av = λv")
+    output.append("")
+    output.append("Rearranging: (A - λI)v = 0")
+    output.append("")
+
+    # Compute A - λI
+    A_shifted = A - eigenvalue * np.eye(len(A))
+
+    output.append("Solve the homogeneous system:")
+    for i, row in enumerate(A_shifted):
+        terms = []
+        for j, val in enumerate(row):
+            if abs(val) > 1e-10:
+                if j == 0:
+                    terms.append(f"{val:g}x₁")
+                else:
+                    sign = "+" if val >= 0 else "-"
+                    terms.append(f"{sign} {abs(val):g}x₂" if len(row) == 2 else f"{sign} {abs(val):g}x_{j+1}")
+
+        if terms:
+            output.append("  " + " ".join(terms) + " = 0")
+
+    output.append("")
+    output.append("Any non-zero solution v is an eigenvector!")
+
+    return "\n".join(output)

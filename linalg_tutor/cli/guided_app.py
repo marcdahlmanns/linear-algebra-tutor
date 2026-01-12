@@ -397,6 +397,43 @@ class GuidedLearningApp:
             console.print()
             questionary.press_any_key_to_continue("Press any key to continue...").ask()
 
+    def _format_solution(self, solution):
+        """Format a Solution or SimpleSolution object for display.
+
+        Args:
+            solution: Solution or SimpleSolution object with steps
+
+        Returns:
+            None (prints directly to console)
+        """
+        # Display problem statement or operation
+        if hasattr(solution, 'problem_statement'):
+            console.print(f"\n[bold cyan]Problem:[/bold cyan] {solution.problem_statement}\n")
+        elif hasattr(solution, 'operation'):
+            console.print(f"\n[bold cyan]Operation:[/bold cyan] {solution.operation}\n")
+
+        # Display steps
+        for i, step in enumerate(solution.steps, 1):
+            # Handle both Solution (with step_number) and SimpleSolution (without)
+            step_num = step.step_number if hasattr(step, 'step_number') else i
+            console.print(f"[bold]Step {step_num}: {step.description}[/bold]")
+            if step.mathematical_expression:
+                console.print(Panel(step.mathematical_expression, border_style="yellow"))
+            if step.explanation:
+                console.print(f"[dim]{step.explanation}[/dim]")
+            if hasattr(step, 'intermediate_result') and step.intermediate_result:
+                console.print(f"[green]{step.intermediate_result}[/green]")
+            console.print()
+
+        # Display final answer
+        if solution.final_answer is not None:
+            console.print("[bold green]Final Answer:[/bold green]")
+            console.print(f"{solution.final_answer}")
+
+        # Display verification if present (only on Solution, not SimpleSolution)
+        if hasattr(solution, 'verification') and solution.verification:
+            console.print(f"\n[cyan]Verification:[/cyan] {solution.verification}")
+
     def _show_solvers(self, topic: str):
         """Show interactive solvers for a topic.
 
@@ -461,70 +498,79 @@ class GuidedLearningApp:
                 if selection == "vector_add":
                     v = np.array([1, 2, 3])
                     w = np.array([4, 5, 6])
+                    expected = v + w
                     solver = get_solver("vector_add")
-                    solution = solver.solve(v=v, w=w)
+                    solution = solver.solve_with_steps({"v": v, "w": w}, expected)
                     console.print(Panel.fit("[bold]Example: Vector Addition[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "dot_product":
                     v = np.array([1, 2, 3])
                     w = np.array([4, 5, 6])
-                    solver = get_solver("dot_product")
-                    solution = solver.solve(v=v, w=w)
+                    expected = np.dot(v, w)
+                    solver = get_solver("vector_dot")
+                    solution = solver.solve_with_steps({"v": v, "w": w}, expected)
                     console.print(Panel.fit("[bold]Example: Dot Product[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "matrix_mult":
                     A = np.array([[1, 2], [3, 4]])
                     B = np.array([[5, 6], [7, 8]])
+                    expected = A @ B
                     solver = get_solver("matrix_multiply")
-                    solution = solver.solve(A=A, B=B)
+                    solution = solver.solve_with_steps({"A": A, "B": B}, expected)
                     console.print(Panel.fit("[bold]Example: Matrix Multiplication[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "transpose":
                     A = np.array([[1, 2, 3], [4, 5, 6]])
+                    expected = A.T
                     solver = get_solver("matrix_transpose")
-                    solution = solver.solve(A=A)
+                    solution = solver.solve_with_steps({"A": A}, expected)
                     console.print(Panel.fit("[bold]Example: Matrix Transpose[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "determinant":
                     A = np.array([[3, 2], [1, 4]])
-                    solver = get_solver("determinant")
-                    solution = solver.solve(A=A)
+                    # Use visualization instead (no determinant solver exists)
+                    from ..visualization import visualize_determinant_2x2, visualize_determinant_geometric
                     console.print(Panel.fit("[bold]Example: Determinant[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    viz = visualize_determinant_2x2(A)
+                    console.print(Panel(viz, border_style="cyan"))
+                    console.print()
+                    geo_viz = visualize_determinant_geometric(A)
+                    console.print(Panel(geo_viz, title="Geometric Meaning", border_style="green"))
 
                 elif selection == "gaussian":
                     A = np.array([[2.0, 1.0, -1.0], [-3.0, -1.0, 2.0], [-2.0, 1.0, 2.0]])
                     b = np.array([8.0, -11.0, -3.0])
-                    solver = get_solver("gaussian")
-                    solution = solver.solve(A=A, b=b)
+                    solver = get_solver("gaussian_elimination")
+                    # Note: gaussian_elimination expects A and b as separate args, not dict
+                    solution = solver.solve_with_steps(A, b)
                     console.print(Panel.fit("[bold]Example: Gaussian Elimination[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "rref":
                     A = np.array([[2.0, 1.0], [4.0, 3.0]])
                     solver = get_solver("rref")
-                    solution = solver.solve(A=A)
+                    solution = solver.solve_with_steps(A, None)
                     console.print(Panel.fit("[bold]Example: RREF[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "solve_system":
                     A = np.array([[1.0, 2.0], [3.0, 4.0]])
                     b = np.array([5.0, 11.0])
                     solver = get_solver("linear_system")
-                    solution = solver.solve(A=A, b=b)
+                    solution = solver.solve_with_steps(A, b)
                     console.print(Panel.fit("[bold]Example: Solve Linear System[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
                 elif selection == "eigenvalues":
                     A = np.array([[4.0, -2.0], [1.0, 1.0]])
-                    solver = get_solver("eigenvalues")
-                    solution = solver.solve(A=A)
+                    solver = get_solver("eigenvalue")
+                    solution = solver.solve_with_steps(A)
                     console.print(Panel.fit("[bold]Example: Eigenvalues (2×2)[/bold]", border_style="cyan"))
-                    console.print(solution.formatted_solution)
+                    self._format_solution(solution)
 
             except Exception as e:
                 console.print(f"[red]Error running solver: {e}[/red]")

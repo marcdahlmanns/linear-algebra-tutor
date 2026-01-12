@@ -279,3 +279,196 @@ def print_vector_visualization(vector: np.ndarray, label: str = "v", show_2d: bo
         art = visualize_vector_2d(vector, label)
         console.print("\n")
         console.print(Panel(art, title="2D Visualization", border_style="green"))
+
+
+def visualize_vector_norm(v: np.ndarray) -> str:
+    """Visualize vector norm (magnitude) calculation.
+
+    Args:
+        v: Vector
+
+    Returns:
+        String showing norm calculation
+    """
+    output = []
+    output.append("Vector Norm (Magnitude):")
+    output.append("")
+    output.append(f"v = {v}")
+    output.append("")
+
+    # Show formula
+    if len(v) == 2:
+        output.append(f"||v|| = √(v₁² + v₂²)")
+        output.append(f"     = √({v[0]:g}² + {v[1]:g}²)")
+    elif len(v) == 3:
+        output.append(f"||v|| = √(v₁² + v₂² + v₃²)")
+        output.append(f"     = √({v[0]:g}² + {v[1]:g}² + {v[2]:g}²)")
+    else:
+        components = " + ".join([f"v{i+1}²" for i in range(len(v))])
+        output.append(f"||v|| = √({components})")
+
+    # Calculate
+    squares = [f"{x**2:g}" for x in v]
+    output.append(f"     = √({' + '.join(squares)})")
+
+    norm = np.linalg.norm(v)
+    sum_squares = np.sum(v**2)
+    output.append(f"     = √({sum_squares:g})")
+    output.append(f"     = {norm:.6g}")
+
+    output.append("")
+    output.append("A unit vector has ||v|| = 1")
+    if abs(norm - 1.0) < 1e-6:
+        output.append("✓ This is a unit vector!")
+    else:
+        output.append(f"To normalize: v̂ = v / ||v|| = v / {norm:.6g}")
+
+    return "\n".join(output)
+
+
+def visualize_cross_product(v: np.ndarray, w: np.ndarray) -> str:
+    """Visualize cross product calculation for 3D vectors.
+
+    Args:
+        v: First 3D vector
+        w: Second 3D vector
+
+    Returns:
+        String showing cross product calculation
+    """
+    if len(v) != 3 or len(w) != 3:
+        return "Cross product is only defined for 3D vectors"
+
+    output = []
+    output.append("Cross Product: v × w")
+    output.append("")
+    output.append(f"v = [{v[0]:g}, {v[1]:g}, {v[2]:g}]")
+    output.append(f"w = [{w[0]:g}, {w[1]:g}, {w[2]:g}]")
+    output.append("")
+
+    # Determinant method
+    output.append("Using determinant formula:")
+    output.append("")
+    output.append("      │ i    j    k  │")
+    output.append(f"v × w │ {v[0]:g}   {v[1]:g}   {v[2]:g} │")
+    output.append(f"      │ {w[0]:g}   {w[1]:g}   {w[2]:g} │")
+    output.append("")
+
+    # Calculate components
+    cross = np.cross(v, w)
+    i_comp = v[1]*w[2] - v[2]*w[1]
+    j_comp = -(v[0]*w[2] - v[2]*w[0])
+    k_comp = v[0]*w[1] - v[1]*w[0]
+
+    output.append(f"= i({v[1]:g}×{w[2]:g} - {v[2]:g}×{w[1]:g}) - j({v[0]:g}×{w[2]:g} - {v[2]:g}×{w[0]:g}) + k({v[0]:g}×{w[1]:g} - {v[1]:g}×{w[0]:g})")
+    output.append(f"= i({i_comp:g}) + j({j_comp:g}) + k({k_comp:g})")
+    output.append("")
+    output.append(f"= [{cross[0]:g}, {cross[1]:g}, {cross[2]:g}]")
+
+    # Properties
+    output.append("")
+    output.append("Properties:")
+    output.append(f"  • ||v × w|| = {np.linalg.norm(cross):.6g}")
+    output.append("  • v × w is orthogonal to both v and w")
+    output.append(f"  • v · (v × w) = {np.dot(v, cross):.6g} (should be ~0)")
+    output.append(f"  • w · (v × w) = {np.dot(w, cross):.6g} (should be ~0)")
+
+    # Geometric meaning
+    mag = np.linalg.norm(cross)
+    output.append("")
+    output.append(f"  • ||v × w|| = area of parallelogram formed by v and w")
+    output.append(f"  • Right-hand rule determines direction")
+
+    return "\n".join(output)
+
+
+def visualize_projection(v: np.ndarray, onto: np.ndarray) -> str:
+    """Visualize projection of v onto another vector.
+
+    Args:
+        v: Vector to project
+        onto: Vector to project onto
+
+    Returns:
+        String showing projection calculation
+    """
+    output = []
+    output.append(f"Projection of v onto w:")
+    output.append("")
+    output.append(f"v = {v}")
+    output.append(f"w = {onto}")
+    output.append("")
+
+    # Formula
+    output.append("Formula: proj_w(v) = (v·w / w·w) × w")
+    output.append("")
+
+    # Calculate
+    dot_vw = np.dot(v, onto)
+    dot_ww = np.dot(onto, onto)
+
+    output.append(f"v·w = {dot_vw:g}")
+    output.append(f"w·w = {dot_ww:g}")
+    output.append("")
+
+    scalar = dot_vw / dot_ww
+    proj = scalar * onto
+
+    output.append(f"proj_w(v) = ({dot_vw:g} / {dot_ww:g}) × w")
+    output.append(f"          = {scalar:g} × w")
+    output.append(f"          = {proj}")
+
+    # Component analysis
+    output.append("")
+    output.append("Component Analysis:")
+    output.append(f"  • Component parallel to w: {proj}")
+    output.append(f"  • Magnitude of parallel component: {np.linalg.norm(proj):.6g}")
+
+    # Perpendicular component
+    perp = v - proj
+    output.append(f"  • Component perpendicular to w: {perp}")
+    output.append(f"  • Magnitude of perpendicular component: {np.linalg.norm(perp):.6g}")
+
+    # Verification
+    output.append("")
+    output.append("Verification:")
+    output.append(f"  • v = parallel + perpendicular")
+    output.append(f"  • {v} = {proj} + {perp}")
+    check = proj + perp
+    output.append(f"  • Check: {check} ✓")
+
+    return "\n".join(output)
+
+
+def visualize_vector_subtraction(v: np.ndarray, w: np.ndarray) -> str:
+    """Visualize vector subtraction.
+
+    Args:
+        v: First vector
+        w: Second vector to subtract
+
+    Returns:
+        String showing subtraction
+    """
+    result = v - w
+
+    output = []
+    output.append("Vector Subtraction:")
+    output.append("")
+    output.append(f"v = {v}")
+    output.append(f"w = {w}")
+    output.append("")
+    output.append("v - w = v + (-w)")
+    output.append(f"      = {v} + {-w}")
+    output.append(f"      = {result}")
+    output.append("")
+    output.append("Component-wise:")
+    for i in range(len(v)):
+        output.append(f"  [{i+1}]: {v[i]:g} - {w[i]:g} = {result[i]:g}")
+
+    output.append("")
+    output.append("Geometric meaning:")
+    output.append("  • v - w is the vector from w to v")
+    output.append("  • Equivalently, v = w + (v - w)")
+
+    return "\n".join(output)
