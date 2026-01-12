@@ -67,8 +67,8 @@ class ExercisePrompt:
         self.shown_hints: List[str] = []
         self.attempts = 0
 
-    def _build_display(self) -> Layout:
-        """Build the compact display layout."""
+    def _build_display(self):
+        """Build the compact display - return Group instead of Layout."""
         # Get terminal size for dynamic sizing
         try:
             terminal_size = os.get_terminal_size()
@@ -76,20 +76,7 @@ class ExercisePrompt:
         except OSError:
             term_height = 24  # Default fallback
 
-        # Calculate dynamic sizes - question needs adequate space
-        # More generous calculation to ensure text fits
-        question_chars = len(self.exercise.question)
-        estimated_lines = max(3, (question_chars // 60) + 3)  # At least 3 lines, with buffer
-        question_size = min(max(estimated_lines, 4), 10)  # Between 4-10 lines
-
-        layout = Layout()
-
-        # Divide screen into sections
-        layout.split_column(
-            Layout(name="header", size=1),  # Just one line for header
-            Layout(name="question", size=question_size),  # Dynamic question size
-            Layout(name="status"),  # Rest for status
-        )
+        display_parts = []
 
         # Header: Progress indicator - compact single line
         difficulty_color = {
@@ -100,54 +87,50 @@ class ExercisePrompt:
         color = difficulty_color.get(self.exercise.difficulty.value, "cyan")
 
         # Single line header without panel borders
-        header_text = (
+        header_text = Text(
             f"[{color}]{self.exercise.topic.title()}[/{color}] │ "
             f"[bold]{self.current_exercise}/{self.total_exercises}[/bold] │ "
-            f"[{color}]{self.exercise.difficulty.value.title()}[/{color}]"
+            f"[{color}]{self.exercise.difficulty.value.title()}[/{color}]",
+            justify="center"
         )
-        layout["header"].update(Text(header_text, justify="center"))
+        display_parts.append(header_text)
 
-        # Question - use same approach as original working code
+        # Question - compact panel
         question_text = Text(self.exercise.question, style="bold white")
-        layout["question"].update(
-            Panel(
-                Align.center(question_text, vertical="middle"),
-                title=f"[{color}]Question[/{color}]",
-                border_style=color,
-            )
+        question_panel = Panel(
+            Align.center(question_text, vertical="middle"),
+            title=f"[{color}]Question[/{color}]",
+            border_style=color,
         )
-
-        # Status area: hints, messages, stats - all compact
-        status_content = []
+        display_parts.append(question_panel)
 
         # Show hints if any - compact format
         if self.shown_hints:
-            hints_text = "\n".join([  # Single line break instead of double
+            hints_text = "\n".join([
                 f"[yellow]💡 {i+1}:[/yellow] {hint}"
                 for i, hint in enumerate(self.shown_hints)
             ])
-            status_content.append(Panel(
+            hints_panel = Panel(
                 hints_text,
                 title="Hints",
                 border_style="yellow",
                 expand=False,
                 padding=(0, 1)
-            ))
+            )
+            display_parts.append(hints_panel)
 
-        # Show current message if any - no panel borders for messages
+        # Show current message if any
         if self.message:
-            status_content.append(
+            display_parts.append(
                 Text(f"[{self.message_style}]{self.message}[/{self.message_style}]")
             )
 
         # Show stats - compact inline format
         if self.attempts > 0 or self.hints_shown > 0:
             stats_text = f"[dim]Attempts: {self.attempts} │ Hints: {self.hints_shown}/{len(self.exercise.hints)}[/dim]"
-            status_content.append(Text(stats_text))
+            display_parts.append(Text(stats_text))
 
-        layout["status"].update(Group(*status_content) if status_content else "")
-
-        return layout
+        return Group(*display_parts)
 
     def _clear_screen(self):
         """Clear the terminal screen."""
