@@ -76,13 +76,15 @@ class ExercisePrompt:
         except OSError:
             term_height = 24  # Default fallback
 
-        # Calculate dynamic sizes - question takes minimum needed
-        question_lines = len(self.exercise.question) // 70 + 2  # Estimate wrapped lines
-        question_size = min(max(question_lines, 2), 6)  # Between 2-6 lines
+        # Calculate dynamic sizes - question needs adequate space
+        # More generous calculation to ensure text fits
+        question_chars = len(self.exercise.question)
+        estimated_lines = max(3, (question_chars // 60) + 3)  # At least 3 lines, with buffer
+        question_size = min(max(estimated_lines, 4), 10)  # Between 4-10 lines
 
         layout = Layout()
 
-        # Divide screen into sections with minimal sizes
+        # Divide screen into sections
         layout.split_column(
             Layout(name="header", size=1),  # Just one line for header
             Layout(name="question", size=question_size),  # Dynamic question size
@@ -105,14 +107,13 @@ class ExercisePrompt:
         )
         layout["header"].update(Text(header_text, justify="center"))
 
-        # Question - compact panel
+        # Question - use same approach as original working code
         question_text = Text(self.exercise.question, style="bold white")
         layout["question"].update(
             Panel(
-                question_text,
+                Align.center(question_text, vertical="middle"),
                 title=f"[{color}]Question[/{color}]",
                 border_style=color,
-                padding=(0, 1),  # Minimal padding
             )
         )
 
