@@ -2,6 +2,7 @@
 
 from typing import Optional
 from rich.console import Console
+from rich.panel import Panel
 
 from ..core.progress.session_state import SessionState
 from ..core.progress.tracker import ProgressTracker
@@ -254,34 +255,284 @@ class GuidedLearningApp:
             self._show_session_summary(results, topic)
 
     def _show_visualizations(self, topic: str):
-        """Show visualizations for a topic.
+        """Show interactive visualizations for a topic.
 
         Args:
             topic: Topic to visualize
         """
-        console.print(f"[cyan]Visualizations for {topic}[/cyan]")
-        console.print("[yellow]Use visualization commands:[/yellow]")
-        console.print("  linalg-tutor visualize vector 3,4")
-        console.print("  linalg-tutor visualize matrix '1,2;3,4'")
-        console.print("  linalg-tutor visualize demo")
-
         import questionary
-        questionary.press_any_key_to_continue("Press any key to continue...").ask()
+        import numpy as np
+        from ..visualization import (
+            print_vector_visualization,
+            visualize_vector_addition_2d,
+            visualize_dot_product,
+            explain_dot_product_geometry,
+            print_matrix_visualization,
+            visualize_matrix_multiply_step,
+            visualize_determinant_2x2,
+            visualize_matrix_transpose,
+        )
+
+        # Build menu based on topic
+        if topic == "vectors":
+            choices = [
+                {"name": "📐 Vector Visualization (2D)", "value": "vector_2d"},
+                {"name": "➕ Vector Addition (2D)", "value": "vector_add"},
+                {"name": "• Dot Product", "value": "dot_product"},
+                {"name": "✖ Scalar Multiplication", "value": "scalar_mult"},
+                {"name": "← Back", "value": "back"},
+            ]
+        elif topic == "matrices":
+            choices = [
+                {"name": "📊 Matrix Display", "value": "matrix_display"},
+                {"name": "✖ Matrix Multiplication", "value": "matrix_mult"},
+                {"name": "🔄 Matrix Transpose", "value": "transpose"},
+                {"name": "🔢 Determinant (2×2)", "value": "determinant"},
+                {"name": "← Back", "value": "back"},
+            ]
+        elif topic == "linear_systems":
+            choices = [
+                {"name": "📋 Augmented Matrix", "value": "augmented"},
+                {"name": "← Back", "value": "back"},
+            ]
+        else:
+            console.print(f"[yellow]No visualizations available for {topic} yet.[/yellow]")
+            questionary.press_any_key_to_continue("Press any key to continue...").ask()
+            return
+
+        while True:
+            console.clear()
+            console.print(Panel.fit(
+                f"[bold cyan]Visualizations: {topic.title()}[/bold cyan]",
+                border_style="cyan",
+                padding=(0, 1)
+            ))
+
+            selection = questionary.select(
+                "Choose visualization:",
+                choices=choices
+            ).ask()
+
+            if selection == "back" or not selection:
+                break
+
+            console.clear()
+
+            # Show the selected visualization
+            try:
+                if selection == "vector_2d":
+                    v = np.array([3, 4])
+                    console.print(Panel.fit("[bold]Example: Vector v = [3, 4][/bold]", border_style="cyan"))
+                    print_vector_visualization(v, label="v", show_2d=True)
+
+                elif selection == "vector_add":
+                    v = np.array([2, 3])
+                    w = np.array([1, -1])
+                    console.print(Panel.fit("[bold]Example: v = [2, 3] + w = [1, -1][/bold]", border_style="cyan"))
+                    viz = visualize_vector_addition_2d(v, w)
+                    console.print(Panel(viz, title="Vector Addition", border_style="cyan"))
+
+                elif selection == "dot_product":
+                    v = np.array([3, 4])
+                    w = np.array([1, 2])
+                    console.print(Panel.fit("[bold]Example: v = [3, 4] · w = [1, 2][/bold]", border_style="cyan"))
+                    viz = visualize_dot_product(v, w)
+                    console.print(Panel(viz, title="Dot Product", border_style="cyan"))
+                    geo_viz = explain_dot_product_geometry(v, w)
+                    console.print(Panel(geo_viz, title="Geometric Meaning", border_style="green"))
+
+                elif selection == "scalar_mult":
+                    v = np.array([2, 3])
+                    scalar = 2
+                    console.print(Panel.fit(f"[bold]Example: {scalar} × v where v = [2, 3][/bold]", border_style="cyan"))
+                    print_vector_visualization(v, label="v", show_2d=True)
+                    console.print(f"\n[cyan]Scalar:[/cyan] {scalar}")
+                    console.print(f"[cyan]Result:[/cyan] {scalar} × v = {scalar * v}")
+
+                elif selection == "matrix_display":
+                    A = np.array([[1, 2], [3, 4]])
+                    console.print(Panel.fit("[bold]Example: 2×2 Matrix[/bold]", border_style="cyan"))
+                    print_matrix_visualization(A, title="Matrix A")
+
+                elif selection == "matrix_mult":
+                    A = np.array([[1, 2], [3, 4]])
+                    B = np.array([[5, 6], [7, 8]])
+                    console.print(Panel.fit("[bold]Example: Matrix Multiplication[/bold]", border_style="cyan"))
+                    print_matrix_visualization(A, title="Matrix A")
+                    console.print("\n[bold cyan]×[/bold cyan]\n")
+                    print_matrix_visualization(B, title="Matrix B")
+                    console.print("\n[bold]Example calculation for element (0,0):[/bold]")
+                    step_viz = visualize_matrix_multiply_step(A, B, 0, 0)
+                    console.print(Panel(step_viz, border_style="yellow"))
+
+                elif selection == "transpose":
+                    A = np.array([[1, 2, 3], [4, 5, 6]])
+                    console.print(Panel.fit("[bold]Example: Matrix Transpose[/bold]", border_style="cyan"))
+                    print_matrix_visualization(A, title="Original Matrix A")
+                    console.print("\n[bold cyan]Transpose:[/bold cyan]\n")
+                    viz = visualize_matrix_transpose(A)
+                    console.print(viz)
+
+                elif selection == "determinant":
+                    A = np.array([[3, 2], [1, 4]])
+                    console.print(Panel.fit("[bold]Example: 2×2 Determinant[/bold]", border_style="cyan"))
+                    viz = visualize_determinant_2x2(A)
+                    console.print(Panel(viz, title="Determinant Calculation", border_style="cyan"))
+
+                elif selection == "augmented":
+                    A = np.array([[2, 1], [3, 4]])
+                    b = np.array([5, 11])
+                    console.print(Panel.fit("[bold]Example: Augmented Matrix [A|b][/bold]", border_style="cyan"))
+                    console.print("\n[bold]System: Ax = b[/bold]")
+                    print_matrix_visualization(A, title="Coefficient Matrix A")
+                    console.print(f"\n[bold]b =[/bold] {b}")
+                    # Show augmented matrix
+                    augmented = np.column_stack([A, b])
+                    console.print("\n[bold cyan]Augmented Matrix [A|b]:[/bold cyan]")
+                    print_matrix_visualization(augmented, title="[A|b]")
+
+            except Exception as e:
+                console.print(f"[red]Error showing visualization: {e}[/red]")
+
+            console.print()
+            questionary.press_any_key_to_continue("Press any key to continue...").ask()
 
     def _show_solvers(self, topic: str):
-        """Show solvers for a topic.
+        """Show interactive solvers for a topic.
 
         Args:
             topic: Topic for solvers
         """
-        console.print(f"[cyan]Advanced Solvers for {topic}[/cyan]")
-        console.print("[yellow]Use solver commands:[/yellow]")
-        console.print("  linalg-tutor solve gaussian '2,1;3,4' -b '5,6'")
-        console.print("  linalg-tutor solve eigenvalues '4,-2;1,1'")
-        console.print("  linalg-tutor solve demo")
-
         import questionary
-        questionary.press_any_key_to_continue("Press any key to continue...").ask()
+        import numpy as np
+        from ..core.solver import get_solver
+
+        # Build menu based on topic
+        if topic == "vectors":
+            choices = [
+                {"name": "➕ Vector Addition", "value": "vector_add"},
+                {"name": "• Dot Product", "value": "dot_product"},
+                {"name": "← Back", "value": "back"},
+            ]
+        elif topic == "matrices":
+            choices = [
+                {"name": "✖ Matrix Multiplication", "value": "matrix_mult"},
+                {"name": "🔄 Matrix Transpose", "value": "transpose"},
+                {"name": "🔢 Determinant", "value": "determinant"},
+                {"name": "← Back", "value": "back"},
+            ]
+        elif topic == "linear_systems":
+            choices = [
+                {"name": "📐 Gaussian Elimination", "value": "gaussian"},
+                {"name": "🎯 RREF", "value": "rref"},
+                {"name": "📊 Solve Linear System", "value": "solve_system"},
+                {"name": "← Back", "value": "back"},
+            ]
+        elif topic == "eigenvalues":
+            choices = [
+                {"name": "λ Eigenvalues (2×2)", "value": "eigenvalues"},
+                {"name": "← Back", "value": "back"},
+            ]
+        else:
+            console.print(f"[yellow]No solvers available for {topic} yet.[/yellow]")
+            questionary.press_any_key_to_continue("Press any key to continue...").ask()
+            return
+
+        while True:
+            console.clear()
+            console.print(Panel.fit(
+                f"[bold cyan]Advanced Solvers: {topic.title()}[/bold cyan]",
+                border_style="cyan",
+                padding=(0, 1)
+            ))
+
+            selection = questionary.select(
+                "Choose solver:",
+                choices=choices
+            ).ask()
+
+            if selection == "back" or not selection:
+                break
+
+            console.clear()
+
+            # Show the selected solver with example
+            try:
+                if selection == "vector_add":
+                    v = np.array([1, 2, 3])
+                    w = np.array([4, 5, 6])
+                    solver = get_solver("vector_add")
+                    solution = solver.solve(v=v, w=w)
+                    console.print(Panel.fit("[bold]Example: Vector Addition[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "dot_product":
+                    v = np.array([1, 2, 3])
+                    w = np.array([4, 5, 6])
+                    solver = get_solver("dot_product")
+                    solution = solver.solve(v=v, w=w)
+                    console.print(Panel.fit("[bold]Example: Dot Product[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "matrix_mult":
+                    A = np.array([[1, 2], [3, 4]])
+                    B = np.array([[5, 6], [7, 8]])
+                    solver = get_solver("matrix_multiply")
+                    solution = solver.solve(A=A, B=B)
+                    console.print(Panel.fit("[bold]Example: Matrix Multiplication[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "transpose":
+                    A = np.array([[1, 2, 3], [4, 5, 6]])
+                    solver = get_solver("matrix_transpose")
+                    solution = solver.solve(A=A)
+                    console.print(Panel.fit("[bold]Example: Matrix Transpose[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "determinant":
+                    A = np.array([[3, 2], [1, 4]])
+                    solver = get_solver("determinant")
+                    solution = solver.solve(A=A)
+                    console.print(Panel.fit("[bold]Example: Determinant[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "gaussian":
+                    A = np.array([[2.0, 1.0, -1.0], [-3.0, -1.0, 2.0], [-2.0, 1.0, 2.0]])
+                    b = np.array([8.0, -11.0, -3.0])
+                    solver = get_solver("gaussian")
+                    solution = solver.solve(A=A, b=b)
+                    console.print(Panel.fit("[bold]Example: Gaussian Elimination[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "rref":
+                    A = np.array([[2.0, 1.0], [4.0, 3.0]])
+                    solver = get_solver("rref")
+                    solution = solver.solve(A=A)
+                    console.print(Panel.fit("[bold]Example: RREF[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "solve_system":
+                    A = np.array([[1.0, 2.0], [3.0, 4.0]])
+                    b = np.array([5.0, 11.0])
+                    solver = get_solver("linear_system")
+                    solution = solver.solve(A=A, b=b)
+                    console.print(Panel.fit("[bold]Example: Solve Linear System[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+                elif selection == "eigenvalues":
+                    A = np.array([[4.0, -2.0], [1.0, 1.0]])
+                    solver = get_solver("eigenvalues")
+                    solution = solver.solve(A=A)
+                    console.print(Panel.fit("[bold]Example: Eigenvalues (2×2)[/bold]", border_style="cyan"))
+                    console.print(solution.formatted_solution)
+
+            except Exception as e:
+                console.print(f"[red]Error running solver: {e}[/red]")
+                import traceback
+                console.print(f"[dim]{traceback.format_exc()}[/dim]")
+
+            console.print()
+            questionary.press_any_key_to_continue("Press any key to continue...").ask()
 
     def _view_progress(self):
         """Show detailed progress view."""
